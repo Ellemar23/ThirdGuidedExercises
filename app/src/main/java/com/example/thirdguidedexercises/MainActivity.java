@@ -9,68 +9,75 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 public class MainActivity extends AppCompatActivity {
     EditText num1, num2;
     Button sum, ave;
     Toast toast;
     View view;
-    double firstNum = 0, secondNum = 0, total = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         num1 = findViewById(R.id.etNum1GE3);
         num2 = findViewById(R.id.etNum2GE3);
         sum = findViewById(R.id.btnSumGE3);
         ave = findViewById(R.id.btnAveGE3);
-        computeTotal();
+
+        setupListeners();
     }
-    public void computeTotal(){
-        sum.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // this will check if our two EditText has a text value
-                if(num1.getText().toString().isEmpty() ||
-                        num2.getText().toString().isEmpty()){
-                    displayErrorMessage();
-                }else{
-                    firstNum = Double.parseDouble(num1.getText().toString());
-                    secondNum = Double.parseDouble(num2.getText().toString());
-                    total = firstNum + secondNum;
-                    Toast.makeText(getApplicationContext(),
-                            "SUM: " + total,Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-        ave.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // another way of checking if our two EditText has a text value
-                if(num1.getText().length() <= 0 ||
-                        num2.getText().length() <= 0 ){
-                    displayErrorMessage();
-                }else{
-                    firstNum = Double.parseDouble(num1.getText().toString());
-                    secondNum = Double.parseDouble(num2.getText().toString());
-                    total = (firstNum + secondNum) / 2;
-                    Toast.makeText(getApplicationContext(),
-                            "AVE: " + total,Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
+
+    private void setupListeners() {
+        sum.setOnClickListener(v -> compute("sum"));
+        ave.setOnClickListener(v -> compute("average"));
     }
-    public void displayErrorMessage(){
-        toast = Toast.makeText(getApplicationContext(),
-                "Please Enter a Number",Toast.LENGTH_SHORT);
+
+    private void compute(String type) {
+        String strNum1 = num1.getText().toString().trim();
+        String strNum2 = num2.getText().toString().trim();
+
+        if (strNum1.isEmpty()){
+            num1.setError("Please enter a number");
+            return;
+        }
+        if (strNum2.isEmpty()){
+            num2.setError("Please enter a number");
+            return;
+        }
+
+        double firstNum, secondNum;
+        try {
+            firstNum = Double.parseDouble(strNum1);
+            secondNum = Double.parseDouble(strNum2);
+        } catch (NumberFormatException e) {
+            displayErrorMessage("Invalid number format");
+            return;
+        }
+
+        double result;
+        if (type.equals("sum")) {
+            result = firstNum + secondNum;
+            showToast("SUM: " + result);
+        } else if (type.equals("average")) {
+            result = (firstNum + secondNum) / 2;
+            showToast("AVERAGE: " + result);
+        }
+    }
+
+    private void displayErrorMessage(String message) {
+        toast = Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT);
         view = toast.getView();
-        view.getBackground().setColorFilter(Color.RED, PorterDuff.Mode.SRC_IN);
+        if (view != null) {
+            view.getBackground().setColorFilter(Color.RED, PorterDuff.Mode.SRC_IN);
+        }
         toast.setGravity(Gravity.CENTER, 0, 0);
         toast.show();
+    }
+
+    private void showToast(String message) {
+        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
     }
 }
